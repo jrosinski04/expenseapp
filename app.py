@@ -118,8 +118,7 @@ with st.form("expense_form", clear_on_submit=True):
         share_val = st.number_input(
             "Share of the person who paid (%)", # <-- STATIC LABEL
             min_value=0.0, 
-            max_value=100.0, 
-            value=50.0, 
+            max_value=100.0,
             step=5.0,
             key="share_pct"
         )
@@ -127,7 +126,6 @@ with st.form("expense_form", clear_on_submit=True):
         share_val = st.number_input(
             "Share of the person who paid (€)", # <-- STATIC LABEL
             min_value=0.0, 
-            value=0.0,                          # <-- STATIC DEFAULT
             step=1.0,
             key="share_exact"
         )
