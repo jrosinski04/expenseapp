@@ -96,64 +96,62 @@ st.divider()
 # --- LOG NEW EXPENSE FORM ---
 st.subheader("Log a New Expense")
 
-with st.form("expense_form", clear_on_submit=True):
-    desc = st.text_input("What was it for?", placeholder="e.g., Rental Car, Dinner")
-    
-    col_a, col_b = st.columns(2)
-    with col_a:
-        amount = st.number_input("Total Amount Spent (€)", min_value=0.01, step=1.00)
-    with col_b:
-        expense_date = st.date_input("Date", value=date.today())
-        
-    col_c, col_d = st.columns(2)
-    with col_c:
-        payment_method = st.selectbox("Payment Method", ["Card", "Cash"])
-    with col_d:
-        payer = st.selectbox("Who Paid?", [current_user, other_user])
+desc = st.text_input("What was it for?", placeholder="e.g., Rental Car, Dinner")
 
-    st.markdown("**How should this be split?**")
-    split_mode = st.radio("Split type", ["Percentage (%)", "Exact Amount (€)"], horizontal=True)
+col_a, col_b = st.columns(2)
+with col_a:
+    amount = st.number_input("Total Amount Spent (€)", min_value=0.00, value=0.00, step=1.00)
+with col_b:
+    expense_date = st.date_input("Date", value=date.today())
     
-    if split_mode == "Percentage (%)":
-        share_val = st.number_input(
-            "Share of the person who paid (%)", # <-- STATIC LABEL
-            min_value=0.0, 
-            max_value=100.0,
-            step=5.0,
-            key="share_pct"
-        )
+col_c, col_d = st.columns(2)
+with col_c:
+    payment_method = st.selectbox("Payment Method", ["Card", "Cash"])
+with col_d:
+    payer = st.selectbox("Who Paid?", [current_user, other_user])
+
+st.markdown("**How should this be split?**")
+split_mode = st.radio("Split type", ["Percentage (%)", "Exact Amount (€)"], horizontal=True)
+
+if split_mode == "Percentage (%)":
+    share_val = st.number_input(
+        f"Share of {payer} (%)", 
+        min_value=0.0, 
+        max_value=100.0, 
+        value=50.0, 
+        step=5.0
+    )
+    # Calculate the exact monetary amount the payer is responsible for
+    calculated_payer_share = amount * (share_val / 100.0)
+else:
+    share_val = st.number_input(
+        f"Share of {payer} (€)", 
+        min_value=0.0, 
+        value=amount / 2 if amount > 0 else 0.0, 
+        step=1.0
+    )
+    calculated_payer_share = share_val
+
+# Standard button instead of form submit
+if st.button("Log Expense", type="primary"):
+    if not desc:
+        st.error("Please enter a description.")
+    elif amount <= 0:
+        st.error("Please enter an amount greater than zero.")
     else:
-        share_val = st.number_input(
-            "Share of the person who paid (€)", # <-- STATIC LABEL
-            min_value=0.0, 
-            step=1.0,
-            key="share_exact"
-        )
+        # Insert into Supabase
+        supabase.table("expenses").insert({
+            "date": str(expense_date),
+            "description": desc,
+            "amount": amount,
+            "payment_method": payment_method,
+            "payer": payer,
+            "payer_share": calculated_payer_share
+        }).execute()
+        
+        st.success("Expense logged successfully!")
+        st.rerun() # This will refresh the page, instantly clearing the inputs and updating the dashboard
 
-    submit = st.form_submit_button("Log Expense")
-
-    if submit:
-        if not desc:
-            st.error("Please enter a description.")
-        else:
-            # Calculate the payer's exact monetary share based on the selected mode
-            if split_mode == "Percentage (%)":
-                calculated_payer_share = amount * (share_val / 100.0)
-            else:
-                calculated_payer_share = share_val
-            
-            # Insert into Supabase
-            supabase.table("expenses").insert({
-                "date": str(expense_date),
-                "description": desc,
-                "amount": amount,
-                "payment_method": payment_method,
-                "payer": payer,
-                "payer_share": calculated_payer_share
-            }).execute()
-            
-            st.success("Expense logged successfully!")
-            st.rerun()
 
 st.divider()
 
