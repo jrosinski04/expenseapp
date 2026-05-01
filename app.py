@@ -103,7 +103,7 @@ with st.form("expense_form", clear_on_submit=True):
     with col_a:
         amount = st.number_input("Total Amount Spent (€)", min_value=0.01, step=1.00)
     with col_b:
-        expense_date = st.date_input("Date", default=date.today())
+        expense_date = st.date_input("Date", value=date.today())
         
     col_c, col_d = st.columns(2)
     with col_c:
