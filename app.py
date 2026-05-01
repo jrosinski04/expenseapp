@@ -103,7 +103,7 @@ with st.form("expense_form", clear_on_submit=True):
     with col_a:
         amount = st.number_input("Total Amount Spent (€)", min_value=0.01, step=1.00)
     with col_b:
-        expense_date = st.date_input("Date", value=date.today())
+        expense_date = st.date_input("Date", default=date.today())
         
     col_c, col_d = st.columns(2)
     with col_c:
@@ -115,9 +115,22 @@ with st.form("expense_form", clear_on_submit=True):
     split_mode = st.radio("Split type", ["Percentage (%)", "Exact Amount (€)"], horizontal=True)
     
     if split_mode == "Percentage (%)":
-        share_val = st.number_input(f"{payer}'s Share (%)", min_value=0.0, max_value=100.0, value=50.0, step=5.0, key="share_pct")
+        share_val = st.number_input(
+            "Share of the person who paid (%)", # <-- STATIC LABEL
+            min_value=0.0, 
+            max_value=100.0, 
+            value=50.0, 
+            step=5.0,
+            key="share_pct"
+        )
     else:
-        share_val = st.number_input(f"{payer}'s Share (€)", min_value=0.0, value=amount/2 if amount else 0.0, step=1.0, key="share_exact")
+        share_val = st.number_input(
+            "Share of the person who paid (€)", # <-- STATIC LABEL
+            min_value=0.0, 
+            value=0.0,                          # <-- STATIC DEFAULT
+            step=1.0,
+            key="share_exact"
+        )
 
     submit = st.form_submit_button("Log Expense")
 
