@@ -115,9 +115,9 @@ with st.form("expense_form", clear_on_submit=True):
     split_mode = st.radio("Split type", ["Percentage (%)", "Exact Amount (€)"], horizontal=True)
     
     if split_mode == "Percentage (%)":
-        share_val = st.number_input(f"{payer}'s Share (%)", min_value=0.0, max_value=100.0, value=50.0, step=5.0)
+        share_val = st.number_input(f"{payer}'s Share (%)", min_value=0.0, max_value=100.0, value=50.0, step=5.0, key="share_pct")
     else:
-        share_val = st.number_input(f"{payer}'s Share (€)", min_value=0.0, value=amount/2 if amount else 0.0, step=1.0)
+        share_val = st.number_input(f"{payer}'s Share (€)", min_value=0.0, value=amount/2 if amount else 0.0, step=1.0, key="share_exact")
 
     submit = st.form_submit_button("Log Expense")
 
